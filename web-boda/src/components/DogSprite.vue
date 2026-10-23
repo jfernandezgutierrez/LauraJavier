@@ -1,0 +1,12 @@
+<script setup lang="ts">
+import {computed,onMounted,onUnmounted,ref} from 'vue'
+const props=withDefaults(defineProps<{mood?:string;sleeping?:boolean;dirty?:boolean;accessory?:string}>(),{mood:'',accessory:''})
+const blink=ref(false);let timer:ReturnType<typeof setInterval>,end:ReturnType<typeof setTimeout>
+onMounted(()=>{timer=setInterval(()=>{blink.value=true;end=setTimeout(()=>blink.value=false,160)},4200)})
+onUnmounted(()=>{clearInterval(timer);clearTimeout(end)})
+const frame=computed(()=>props.sleeping?6:props.mood==='playing'?7:props.mood==='eating'?3:props.mood==='washing'?5:props.mood==='petting'?2:props.dirty?4:blink.value?1:0)
+</script>
+<template><span class="dog-sprite" :class="[mood,{asleep:sleeping}]" role="img" aria-label="Perrito marrón de pelo rizado"><span class="dog-sprite-frame" :style="{backgroundPosition:`${frame%4*100/3}% ${frame>=4?100:0}%`}"></span><svg v-if="accessory&&!sleeping&&mood!=='playing'" class="dog-accessory" viewBox="0 0 100 100" aria-hidden="true"><path v-if="accessory==='bandana'" d="M30 56 Q50 63 69 55 L54 76 L46 64 Z" fill="#bd705f" stroke="#8d4f42" stroke-width="1.3"/><g v-if="accessory==='collar'"><path d="M31 57 Q51 65 69 56" fill="none" stroke="#728b62" stroke-width="4"/><circle cx="52" cy="63" r="3.5" fill="#e6b95d" stroke="#ad8033"/></g><g v-if="accessory==='bow'"><path d="M41 59 L29 53 L29 66 Z M46 59 L60 53 L60 66 Z" fill="#8c709f" stroke="#6a527a"/><circle cx="44" cy="59" r="3" fill="#a88ab9"/></g><g v-if="accessory==='hat'"><path d="M33 16 Q50 11 68 16 L64 2 L38 2 Z" fill="#cca978" stroke="#927248"/><path d="M26 16 Q50 22 75 16" stroke="#927248" stroke-width="4" fill="none"/></g></svg></span></template>
+<style scoped>
+.dog-sprite{display:block;position:relative;width:100%;aspect-ratio:1;isolation:isolate;animation:breath 3s ease-in-out infinite;transform-origin:50% 90%}.dog-sprite-frame{position:absolute;inset:0;background-image:url('/images/dog-sprites.png');background-size:400% 200%;background-repeat:no-repeat;opacity:1;mix-blend-mode:normal}.dog-accessory{position:absolute;inset:0;width:100%;height:100%}.petting{animation:wiggle .5s ease-in-out infinite}.eating{animation:nibble .35s ease-in-out infinite}.asleep{animation:breath 4s ease-in-out infinite}.playing{animation:none}@keyframes breath{50%{transform:scaleY(.985)}}@keyframes wiggle{25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}@keyframes nibble{50%{transform:translateY(3px)}}@media(prefers-reduced-motion:reduce){.dog-sprite{animation:none}}
+</style>

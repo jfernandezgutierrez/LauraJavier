@@ -1,0 +1,10 @@
+export interface Story { title:string; text:string; image:string }
+export interface EventStep {title:string;time:string}
+export interface Settings {couple:string;date:string;location:string;dog_name:string;welcome:string;ceremony_name:string;ceremony_address:string;ceremony_time:string;reception_name:string;reception_address:string;reception_time:string;spotify_playlist:string;rsvp_deadline:string;transport:string;accommodation:string;dress_code:string;contact:string;story:Story[];schedule:EventStep[]}
+export interface Profile {id:string;full_name:string;alias:string;phone:string;email_updates:boolean;in_app_updates:boolean;leaderboard_visible:boolean;created_at?:string}
+export interface Invitation {user_id:string;max_guests:number;approved:boolean}
+export interface Rsvp {user_id:string;attending:boolean;guests:number;guest_names:string;dietary:string;bus:boolean;updated_at?:string}
+export interface Song {id:string;user_id:string;title:string;artist:string;spotify_url:string;status:string}
+export interface Announcement {id:string;title:string;body:string;published:boolean;created_at:string}
+export interface Rank {alias:string;score:number;steps:number}
+export const defaults:Settings={couple:'Laura y Javier',date:'',location:'',dog_name:'Nuestro compañero',welcome:'Hay caminos que merece la pena recorrer juntos. Y este, queremos compartirlo contigo.',ceremony_name:'',ceremony_address:'',ceremony_time:'',reception_name:'',reception_address:'',reception_time:'',spotify_playlist:'',rsvp_deadline:'',transport:'',accommodation:'',dress_code:'',contact:'',story:[{title:'Cada paso, juntos',text:'De los pequeños momentos a los grandes recuerdos. Nuestra aventura continúa.',image:'couple'},{title:'Un lugar al que llamar hogar',text:'Lo soñamos, lo trabajamos, lo conseguimos.',image:'home'},{title:'Y unas huellas a nuestro lado',text:'Nuestra historia también se escribe a cuatro patas.',image:'dog'}],schedule:[{title:'La ceremonia',time:''},{title:'Un brindis por nosotros',time:''},{title:'Todos a la mesa',time:''},{title:'Que empiece la fiesta',time:''}]}
