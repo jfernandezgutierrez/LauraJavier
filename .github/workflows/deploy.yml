@@ -48,6 +48,9 @@ jobs:
       - name: Compilar web
         run: pnpm build
 
+      - name: Comprobar juegos
+        run: pnpm test
+
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
 

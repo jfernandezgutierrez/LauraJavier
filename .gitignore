@@ -1,0 +1,8 @@
+.pnpm-store/
+outputs/
+revision_word/
+~$*.docx
+.env*
+!.env.example
+*.keystore
+*.jks

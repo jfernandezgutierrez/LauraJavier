@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import {appUrl} from '../lib/urls'
 import { ref,onMounted,onUnmounted } from 'vue'
 import { X, ArrowRight } from 'lucide-vue-next'
 import { db,fail,friendly } from '../lib/supabase'
@@ -8,7 +9,7 @@ const mode=ref(props.recovery?'update':'login'),email=ref(''),password=ref(''),b
 onMounted(()=>dialog.value?.showModal());onUnmounted(()=>dialog.value?.close())
 async function submit(){busy.value=true;message.value='';error.value='';try{
  if(mode.value==='login'){const {data,error:e}=await db.auth.signInWithPassword({email:email.value,password:password.value});fail(e);user.value=data.user;await refreshProfile();emit('close')}
- else if(mode.value==='reset'){const {error:e}=await db.auth.resetPasswordForEmail(email.value,{redirectTo:location.origin+'/'});fail(e);message.value='Si existe una cuenta, recibirás un enlace para cambiar la contraseña.'}
+ else if(mode.value==='reset'){const {error:e}=await db.auth.resetPasswordForEmail(email.value,{redirectTo:appUrl});fail(e);message.value='Si existe una cuenta, recibirás un enlace para cambiar la contraseña.'}
  else {const {error:e}=await db.auth.updateUser({password:password.value});fail(e);message.value='Contraseña actualizada. Ya puedes continuar.'}
 }catch(e){error.value=friendly(e)}finally{busy.value=false}}
 </script>

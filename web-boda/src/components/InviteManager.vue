@@ -2,11 +2,12 @@
 import {ref,reactive,onMounted,computed} from 'vue'
 import {Mail,Copy,Plus,RefreshCw,Heart,Check} from 'lucide-vue-next'
 import {INVITATION_EMAIL_ENABLED} from '../lib/config'
+import {appUrl} from '../lib/urls'
 import {db,fail,friendly} from '../lib/supabase'
 interface Pass {id:string;email:string;display_name:string;personal_message:string;max_guests:number;expires_at:string;revoked:boolean;claimed_by:string|null;sent_at:string|null;delivery_error:string|null}
 const form=reactive({email:'',name:'',message:'Nos haría muchísima ilusión compartir este día contigo.',limit:1})
 const passes=ref<Pass[]>([]),busy=ref(false),error=ref(''),notice=ref(''),sendOnCreate=ref(INVITATION_EMAIL_ENABLED),latest=ref<{id:string;token:string;display_name:string;email:string}|null>(null),revokeId=ref('')
-const link=computed(()=>latest.value?location.origin+'/#invite='+latest.value.token:'')
+const link=computed(()=>latest.value?appUrl+'#invite='+latest.value.token:'')
 async function load(){const {data,error:e}=await db.from('wedding_guest_passes').select('id,email,display_name,personal_message,max_guests,expires_at,revoked,claimed_by,sent_at,delivery_error').order('created_at',{ascending:false});fail(e);passes.value=data??[]}
 async function action(fn:()=>Promise<void>){busy.value=true;error.value='';notice.value='';try{await fn()}catch(e){error.value=friendly(e)}finally{busy.value=false}}
 async function send(){if(!latest.value)return;const {data,error:e}=await db.functions.invoke('send-wedding-invitation',{body:{pass_id:latest.value.id,invite_token:latest.value.token}});if(e){let detail='No se ha enviado el correo. Puedes copiar el enlace y compartirlo personalmente.';try{const payload=await (e as any).context?.json();if(payload?.error)detail=payload.error}catch{}throw new Error(detail)}if(data?.error)throw new Error(data.error);notice.value='El proveedor ha aceptado el correo de invitación. La entrega puede tardar unos minutos.'}
