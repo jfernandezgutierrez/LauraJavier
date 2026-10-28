@@ -10,3 +10,4 @@ createApp(App).mount('#app')
 if(import.meta.env.PROD&&'serviceWorker' in navigator){window.addEventListener('load',()=>{void navigator.serviceWorker.register(import.meta.env.BASE_URL+'sw.js').catch(()=>{/* Installation remains available without offline mode. */})})}
 import './runner.css'
 import './fullscreen.css'
+import './sprint.css'

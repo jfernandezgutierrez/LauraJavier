@@ -1,5 +1,13 @@
 # Laura y Javier — web de boda
 
+## Huellas Sprint (28 octubre 2026)
+
+Tercer minijuego del patio: carrera lateral con el perrito, saltos sobre troncos y rocas, velocidad progresiva y cambio de día a noche. Espacio/↑/W o un toque para saltar; P/Esc para pausar. Compatible con el modo de pantalla completa; se pausa al ocultar la pestaña o cambiar el tamaño de la ventana. Requiere cuenta y perfil.
+
+Cada paseo consume 3 de energía y 2 de comida (también 1 de higiene). Dura hasta 60 segundos. El récord y la clasificación son independientes de Flappy y Surfer. Las recompensas se suman a la mascota: máximo 60 monedas y 90 XP. `supabase/sprint.sql` refleja la migración remota aplicada: el servidor reproduce los saltos con física entera, comprueba colisiones y duración y entrega los premios una sola vez. No acepta puntuaciones calculadas por el cliente.
+
+Validación: compilación de producción y 25 pruebas locales aprobadas. `supabase/sprint-tests.sql` aprobado con rollback de los datos ficticios: paridad JS/SQL (930 puntos, 33 obstáculos, 60 monedas y 90 XP), costes, idempotencia, aislamiento, acceso anónimo y rechazo de partidas inválidas. La revisión visual automatizada quedó interrumpida por la herramienta de control del navegador; queda pendiente la prueba manual en un teléfono real.
+
 Vue 3 + TypeScript + Vite + Tailwind CSS + Supabase. Proyecto conectado: `zalbymwlhythibeafpac` (laura). El contenido visual y las imágenes siguen el Word del encargo. Los textos narrativos iniciales son editables y no se han inventado fechas ni lugares.
 
 ## Ejecutar
