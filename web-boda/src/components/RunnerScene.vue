@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import {onMounted,onUnmounted,ref,watch} from 'vue'
+import GameDog from './GameDog.vue'
 import type {Runner} from '../lib/runner'
 const props=defineProps<{state:Runner;running:boolean;accessory?:string}>()
-const canvas=ref<HTMLCanvasElement|null>(null)
+const canvas=ref<HTMLCanvasElement|null>(null),puppyStyle=ref({left:'0px',top:'0px',width:'0px',height:'0px'})
 let observer:ResizeObserver,ctx:CanvasRenderingContext2D|null=null,w=0,h=0,lane=1
 const motion=matchMedia('(prefers-reduced-motion: reduce)').matches
 function ellipse(x:number,y:number,rx:number,ry:number,color:string){ctx!.fillStyle=color;ctx!.beginPath();ctx!.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx!.fill()}
@@ -17,16 +18,12 @@ function obstacle(kind:number,x:number,y:number,s:number){ctx!.save();ctx!.trans
  else if(kind===2){rect(-37,-100,10,102,'#537d72',3);rect(27,-100,10,102,'#537d72',3);rect(-42,-103,84,37,'#5b9384',8);rect(-39,-103,78,6,'#8fbc9b',3);for(let i=-30;i<=30;i+=15){ellipse(i,-73,9,8,'#79a988');ellipse(i,-104,8,6,'#8bb889')}ellipse(0,-86,12,12,'#fff3d2');stroke([[0,-92],[0,-81],[-4,-85],[0,-81],[4,-85]],'#4a756b',2.5)}
  else{rect(-36,-71,72,70,'#36745b',14);poly([[36,0],[46,-13],[46,-68],[36,-71]],'#285d4d');rect(-34,-76,69,19,'#72aa75',12);for(let i=0;i<13;i++){const x=(i*23%63)-30,y=-20-(i*17%49);ellipse(x,y,10,8,i%2?'#518d63':'#669e6b')}for(const x of [-21,12]){ellipse(x,-39,5,5,'#f6d6b9');ellipse(x,-39,2,2,'#ce9f69')}}ctx!.restore()}
 function coin(x:number,y:number,s:number,t:number){ctx!.save();ctx!.translate(x,y-18*s);ctx!.scale(s,s);const spin=motion?1:.6+.4*Math.abs(Math.cos(t*.08));ctx!.scale(spin,1);ellipse(0,0,12,14,'#a47430');ellipse(0,-2,11,13,'#ffcf58');ellipse(0,-2,7,9,'#edb341');ctx!.strokeStyle='#ffe694';ctx!.lineWidth=1.5;ctx!.beginPath();ctx!.ellipse(0,-2,8.5,10,0,0,Math.PI*2);ctx!.stroke();ctx!.fillStyle='#fff2bd';ctx!.font='bold 13px sans-serif';ctx!.textAlign='center';ctx!.fillText('✦',0,3);ctx!.restore()}
-function puppy(x:number,y:number,size:number,t:number){const jumping=props.state.jump>0,duck=props.state.duck>0,jump=Math.sin(props.state.jump/42*Math.PI)*size*.9,bounce=props.running&&!motion?Math.sin(t*.52)*size*.035:0;ellipse(x,y+3,size*.39*(1-jump/(size*2)),size*.10,'#35533e30');ctx!.save();ctx!.translate(x,y-jump+bounce);ctx!.scale(size/100,size/100);if(duck)ctx!.scale(1.12,.58);const run=props.running&&!motion?Math.sin(t*.52)*8:0;
- ellipse(-22,-10+run,13,18,'#65412f');ellipse(22,-10-run,13,18,'#704733');ellipse(-22,-2+run,13,7,'#8a5940');ellipse(22,-2-run,13,7,'#986341');
- ellipse(0,-42,35,35,'#815136');ellipse(5,-46,28,32,'#a56e46');ellipse(0,-72,31,29,'#97633f');ellipse(4,-78,25,23,'#b58256');ellipse(-30,-70,12,25,'#6e4531');ellipse(30,-70,12,25,'#784c33');
- for(let i=0;i<32;i++){const px=(i*29%57)-28,py=-91+(i*19%68);if((px/34)**2+((py+59)/45)**2<1){ellipse(px,py,5.2,4.5,i%3?'#ad784e':'#bf8b5b');ctx!.strokeStyle='#81533655';ctx!.lineWidth=1;ctx!.beginPath();ctx!.arc(px,py,3.2,.5,4.8);ctx!.stroke()}}
- stroke([[0,-31],[10+Math.sin(t*.25)*6,-41],[15+Math.sin(t*.25)*6,-32],[8,-27]],'#d09b67',9);
- if(props.accessory==='bandana'||props.accessory==='bow'){poly([[-23,-61],[23,-61],[0,-42]],props.accessory==='bow'?'#a790bd':'#e78c6c');stroke([[-22,-61],[22,-61]],'#f6c8a1',3)}
- if(props.accessory==='collar')stroke([[-22,-61],[0,-57],[22,-61]],'#91bca2',5);
- if(props.accessory==='hat'){ellipse(0,-96,37,7,'#aa8150');rect(-25,-121,50,25,'#d8b67c',8);rect(-25,-104,50,6,'#8f6e53',1)}
- ctx!.restore();if(jumping){stroke([[x-size*.28,y-3],[x-size*.31,y-12]],'#ffffff99',2);stroke([[x+size*.28,y-3],[x+size*.31,y-12]],'#ffffff99',2)}
+function puppy(x:number,y:number,size:number,t:number){
+ const jump=Math.sin(props.state.jump/42*Math.PI)*size*.9,bounce=props.running&&!motion&&!props.state.jump&&!props.state.duck?Math.sin(t*.52)*size*.025:0
+ ellipse(x,y+3,size*.32*(1-jump/(size*2)),size*.08,'#35533e30')
+ puppyStyle.value={left:`${x-size/2}px`,top:`${y-jump+bounce-size*.94}px`,width:`${size}px`,height:`${size}px`}
 }
+
 function draw(){if(!ctx||!w||!h)return;const s=props.state,t=s.tick,phase=Math.min(2,Math.floor(t/1200));ctx.clearRect(0,0,w,h);const sky=ctx.createLinearGradient(0,0,0,h*.5);sky.addColorStop(0,['#75c9df','#87cddc','#e7b797'][phase]!);sky.addColorStop(1,['#e0f3d9','#e9efd2','#ffddac'][phase]!);ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
  ellipse(w*.78,h*.14,w*.07,w*.07,'#fff0b8');ellipse(w*.78,h*.14,w*.10,w*.10,'#fff4c329');
  for(let i=0;i<4;i++){const x=((i*.31+(motion?0:t*.00006))%1.3)*w-w*.15,y=h*(.08+(i%2)*.08);ellipse(x,y,w*.10,h*.018,'#ffffffa0');ellipse(x+w*.03,y-h*.014,w*.045,h*.03,'#ffffffa0')}
@@ -39,7 +36,7 @@ function draw(){if(!ctx||!w||!h)return;const s=props.state,t=s.tick,phase=Math.m
  const items:Array<{depth:number;paint:()=>void}>=[];
  for(let i=0;i<12;i++){const p=(i/12+(motion?0:t*.0014))%1,point=project(p,1),scale=(.1+point.d*1.65)*Math.min(w/440,h/650);for(const side of [-1,1]){const x=w*.5+side*w*(.12+.57*point.d),y=point.y;items.push({depth:p,paint:()=>{if((i+phase)%4===0)house(x,y,scale,phase%2);else tree(x,y,scale,(i+phase)%2)}})}}
  for(const row of s.rows){const p=row.progress/10000,point=project(p,row.lane),c=project(p,row.coinLane),scale=(.16+point.d*1.02)*Math.min(w/350,h/440);items.push({depth:p,paint:()=>{obstacle(row.kind,point.x,point.y,scale);coin(c.x,c.y,scale,t+row.id)}})}
- lane+= (s.lane-lane)*(motion?1:.35);if(Math.abs(s.lane-lane)<.005)lane=s.lane;
+ if(s.tick===0)lane=s.lane;lane+= (s.lane-lane)*(motion?1:.35);if(Math.abs(s.lane-lane)<.005)lane=s.lane;
  items.push({depth:1,paint:()=>puppy(project(1,lane).x,h*.84,Math.min(100,w*.21,h*.19),t)});
  items.sort((a,b)=>a.depth-b.depth).forEach(item=>item.paint());
  if(props.running&&!motion){ctx.globalAlpha=.25;for(let i=0;i<7;i++){const p=(i/7+t*.009)%1,x=w*(i%2?.96:.04),y=h*(.46+p*.5);stroke([[x,y],[x+(i%2?5:-5),y+8+p*25]],'#fff9dd',1.5)}ctx.globalAlpha=1}
@@ -50,4 +47,5 @@ watch(()=>[props.state.tick,props.running,props.accessory],draw,{flush:'post'})
 onMounted(()=>{observer=new ResizeObserver(resize);if(canvas.value)observer.observe(canvas.value);resize()})
 onUnmounted(()=>observer?.disconnect())
 </script>
-<template><canvas ref="canvas" class="surfer-scene" aria-hidden="true"/></template>
+<template><canvas ref="canvas" class="surfer-scene" aria-hidden="true"/><div class="surfer-puppy-sprite" :style="puppyStyle"><GameDog view="back" :pose="state.duck?'duck':state.jump?'jump':'run'" :tick="state.tick" :accessory="accessory"/></div></template>
+<style scoped>.surfer-puppy-sprite{position:absolute;pointer-events:none;z-index:1}</style>

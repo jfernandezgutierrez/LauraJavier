@@ -3,15 +3,16 @@ import {ref,reactive,onMounted,watch} from 'vue'
 import {UserRound,Bell,Heart,Save,Music2,LogOut} from 'lucide-vue-next'
 import {user,profile,invitation,refreshProfile,logout} from '../lib/session'
 import {db,fail,friendly} from '../lib/supabase'
+import {editableProfile} from '../lib/profile'
 import type {Announcement,Rsvp,Song} from '../lib/types'
 const emit=defineEmits<{login:[]}>()
 const tab=ref('invitation'),busy=ref(false),message=ref(''),error=ref(''),announcements=ref<Announcement[]>([]),songs=ref<Song[]>([])
 const form=reactive({full_name:'',alias:'',phone:'',email_updates:false,in_app_updates:true,leaderboard_visible:false})
 const rsvp=reactive({attending:true,guests:1,guest_names:'',dietary:'',bus:false})
-function populate(){Object.assign(form,profile.value??{full_name:user.value?.user_metadata.full_name??'',alias:user.value?.user_metadata.alias??'',phone:'',email_updates:false,in_app_updates:true,leaderboard_visible:false})}
+function populate(){Object.assign(form,editableProfile(profile.value??{full_name:user.value?.user_metadata.full_name??'',alias:user.value?.user_metadata.alias??'',phone:'',email_updates:false,in_app_updates:true,leaderboard_visible:false}))}
 async function load(){if(!user.value)return;populate();const [r,a,s]=await Promise.all([db.from('wedding_rsvps').select('*').eq('user_id',user.value.id).maybeSingle(),db.from('wedding_announcements').select('*').eq('published',true).order('created_at',{ascending:false}),db.from('wedding_songs').select('*').eq('user_id',user.value.id).order('created_at',{ascending:false})]);for(const q of [r,a,s])fail(q.error);if(r.data)Object.assign(rsvp,r.data as Rsvp);announcements.value=a.data??[];songs.value=s.data??[]}
 async function action(fn:()=>Promise<void>){busy.value=true;error.value='';message.value='';try{await fn()}catch(e){error.value=friendly(e)}finally{busy.value=false}}
-async function saveProfile(){await action(async()=>{if(!user.value)return;const payload={...form,full_name:form.full_name.trim(),alias:form.alias.trim()};const result=profile.value?await db.from('wedding_profiles').update(payload).eq('id',user.value.id):await db.from('wedding_profiles').insert({...payload,id:user.value.id});fail(result.error);await refreshProfile();message.value='Tu perfil y preferencias están guardados.';await load()})}
+async function saveProfile(){await action(async()=>{if(!user.value)return;const payload=editableProfile(form);const result=profile.value?await db.from('wedding_profiles').update(payload).eq('id',user.value.id):await db.from('wedding_profiles').insert({...payload,id:user.value.id});fail(result.error);await refreshProfile();message.value='Tu perfil y preferencias están guardados.';await load()})}
 async function saveRsvp(){await action(async()=>{if(!user.value)return;const {error:e}=await db.from('wedding_rsvps').upsert({user_id:user.value.id,attending:rsvp.attending,guests:rsvp.attending?rsvp.guests:0,guest_names:rsvp.attending?rsvp.guest_names:'',dietary:rsvp.attending?rsvp.dietary:'',bus:rsvp.attending&&rsvp.bus,updated_at:new Date().toISOString()});fail(e);message.value='¡Respuesta guardada! Gracias por ayudarnos a preparar este día.'})}
 const labels:Record<string,string>={pending:'Pendiente de revisar',approved:'Aprobada · pendiente de Spotify',added:'Añadida a Spotify',rejected:'No seleccionada'}
 watch(()=>user.value?.id,()=>{void load().catch(e=>error.value=friendly(e))});watch(profile,populate);onMounted(()=>{void load().catch(e=>error.value=friendly(e))})

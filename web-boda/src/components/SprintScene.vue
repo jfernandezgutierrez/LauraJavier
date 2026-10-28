@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import {computed,onMounted,onUnmounted,ref} from 'vue'
+import GameDog from './GameDog.vue'
 import type {Sprint} from '../lib/sprint'
 const props=defineProps<{state:Sprint;running:boolean;accessory?:string}>()
 const svg=ref<SVGSVGElement|null>(null),height=ref(400)
 let observer:ResizeObserver
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches
 const ground=computed(()=>height.value*.78),night=computed(()=>props.state.tick>=1800)
-const stride=computed(()=>props.running&&props.state.y===0&&!reduced?Math.sin(props.state.tick*.55)*11:0)
 const drift=computed(()=>reduced?0:props.state.distance/10)
 onMounted(()=>{observer=new ResizeObserver(entries=>{const r=entries[0]?.contentRect;if(r?.width)height.value=600*r.height/r.width});if(svg.value)observer.observe(svg.value)})
 onUnmounted(()=>observer?.disconnect())
@@ -28,17 +28,6 @@ onUnmounted(()=>observer?.disconnect())
   <g v-else><path d="M0 0 L1 -35 L12 -61 L26 -65 L37 -31 L38 0Z" fill="#818b87" stroke="#606e69" stroke-width="2"/><path d="M12 -60 L18 -30 L3 -16 M18 -30 L35 -22 M18 -30 L26 -63" fill="none" stroke="#a6b2a7" stroke-width="3"/></g>
  </g>
  <ellipse cx="112" :cy="ground+3" :rx="Math.max(12,30-state.y/80)" ry="6" fill="#4f65452b"/>
- <g :transform="`translate(110 ${ground-state.y/10})`">
-  <g fill="#744a34" stroke="#68432e" stroke-width="2"><rect x="-22" :y="-22+stride/2" width="12" :height="22-stride/2" rx="5"/><rect x="12" :y="-22-stride/2" width="12" :height="22+stride/2" rx="5"/></g>
-  <path d="M-25 -31 Q-44 -32 -38 -48 Q-31 -54 -31 -43" fill="none" stroke="#ab7950" stroke-width="11" stroke-linecap="round"/>
-  <ellipse cx="-1" cy="-32" rx="29" ry="21" fill="#a27148"/>
-  <circle cx="20" cy="-53" r="21" fill="#b58256"/><ellipse cx="35" cy="-46" rx="16" ry="11" fill="#c69a6b"/>
-  <g fill="#c08d5c"><circle v-for="n in 16" :key="n" :cx="-23+(n*13)%46" :cy="-43+(n*7)%22" r="5"/><circle cx="11" cy="-69" r="6"/><circle cx="21" cy="-73" r="6"/><circle cx="30" cy="-68" r="6"/></g>
-  <ellipse cx="8" cy="-51" rx="10" ry="18" fill="#795036"/><circle cx="32" cy="-57" r="3" fill="#302b25"/><circle cx="33" cy="-58" r="1" fill="#fff"/><ellipse cx="47" cy="-48" rx="4" ry="3" fill="#352c28"/><path d="M34 -39 Q39 -34 43 -40" fill="none" stroke="#805139" stroke-width="2"/>
-  <path v-if="accessory==='bandana'" d="M9 -33 L30 -38 L23 -19Z" fill="#d8816a"/>
-  <path v-if="accessory==='collar'" d="M9 -33 L29 -37" stroke="#6c9a81" stroke-width="5"/>
-  <path v-if="accessory==='bow'" d="M14 -34 L5 -42 L5 -25 L14 -34 L24 -41 L24 -25Z" fill="#a28ab7"/>
-  <g v-if="accessory==='hat'" fill="#d4b077" stroke="#95724d" stroke-width="2"><path d="M5 -72 L9 -88 H31 L35 -72Z"/><path d="M0 -72 H41" stroke-width="5"/></g>
- </g>
+ <svg x="71" :y="ground-state.y/10-77" width="82" height="82" overflow="visible"><GameDog view="side" :pose="state.y>0?'jump':'run'" :tick="state.tick" :accessory="accessory"/></svg>
  <text x="28" :y="height-18" class="sprint-landmark">{{night?'BAJO LAS ESTRELLAS':'UN PASEO CONTIGO'}} · L &amp; J</text>
 </svg></template>

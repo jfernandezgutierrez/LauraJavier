@@ -1,5 +1,13 @@
 # Laura y Javier — web de boda
 
+## Sprites compartidos y corrección del baño (28 octubre 2026)
+
+Corrección del perfil: el formulario envía únicamente nombre, alias, teléfono y preferencias editables. Antes copiaba también campos internos de la fila, como `id` y `created_at`, y el guardado fallaba por permisos. Los invitados pueden editar su perfil sin ser administradores. `tests/profile.test.ts` y `supabase/profile-update-tests.sql` reproducen el problema y verifican el guardado con el rol de invitado, sin ampliar permisos. Total actual: 27 pruebas locales aprobadas.
+
+Flappy, Surfer y Sprint usan poses derivadas del mismo perrito ilustrado, con carrera, salto y agachado, vistas lateral y trasera y accesorios equipados. Arte y prompt en `docs/dog-game-sprites.md`. Los escenarios y las reglas de los juegos se conservan.
+
+Un baño devuelve la limpieza al 100 %, incluso cuando parte de cero; antes sumaba 35 y podía quedar por debajo del umbral visual de suciedad (40). `supabase/pet-bath-fix.sql` refleja la actualización remota y conserva los permisos, el intervalo de cuidados y la prohibición de premiar baños repetidos de una mascota limpia. Las respuestas antiguas de actualización ya no pueden sobrescribir el cuidado recién realizado. Compilación y 26 pruebas locales aprobadas; `supabase/pet-bath-tests.sql` comprueba limpieza persistente desde 0/4/39, XP, intervalo, sueño y denegación anónima, con rollback de datos ficticios. Falta revisión manual del resultado en un teléfono real.
+
 ## Huellas Sprint (28 octubre 2026)
 
 Tercer minijuego del patio: carrera lateral con el perrito, saltos sobre troncos y rocas, velocidad progresiva y cambio de día a noche. Espacio/↑/W o un toque para saltar; P/Esc para pausar. Compatible con el modo de pantalla completa; se pausa al ocultar la pestaña o cambiar el tamaño de la ventana. Requiere cuenta y perfil.
